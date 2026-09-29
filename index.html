@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crewnexa · Bookkeeping for Mood</title>
+<style>
+  :root{
+    --navy:#0f2a4a; --blue:#2563eb; --blue-d:#1e40af; --bg:#f4f7fb;
+    --card:#ffffff; --ink:#1f2937; --muted:#667085; --line:#e6eaf0;
+    --green:#15803d; --red:#b3261e; --chip:#eef3fd;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:0 16px 56px}
+  /* header */
+  header{background:linear-gradient(180deg,#0f2a4a 0%,#153663 100%);color:#fff;padding:22px 0 18px}
+  .hd{max-width:960px;margin:0 auto;padding:0 16px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px}
+  .brand{font-size:26px;font-weight:800;letter-spacing:.5px}
+  .brand span{color:#7db0ff}
+  .hd .role{font-size:13px;color:#bcd0ee}
+  .subline{max-width:960px;margin:10px auto 0;padding:0 16px;font-size:13.5px;color:#cfe0f6}
+  /* tabs */
+  .tabs{position:sticky;top:0;z-index:5;background:var(--bg);
+    display:flex;gap:8px;padding:14px 0 10px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+  .tab{flex:1 1 auto;min-width:150px;cursor:pointer;border:1px solid var(--line);
+    background:#fff;color:var(--navy);font-weight:700;font-size:14px;
+    padding:12px 14px;border-radius:12px;text-align:center;transition:.15s}
+  .tab small{display:block;font-weight:500;font-size:11.5px;color:var(--muted);margin-top:2px}
+  .tab[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.28)}
+  .tab[aria-selected="true"] small{color:#dbe7ff}
+  /* panels */
+  .panel{display:none;padding-top:22px;animation:f .2s ease}
+  .panel.on{display:block}
+  @keyframes f{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  h2{font-size:20px;color:var(--navy);margin:0 0 6px}
+  .lead{color:#3f4a5a;font-size:14.5px;margin:0 0 18px}
+  /* hero two-column */
+  .hero{display:flex;gap:18px;align-items:stretch;margin-bottom:6px}
+  .hero .htext{flex:1 1 auto;min-width:0}
+  .hero .haside{flex:0 0 270px;align-self:stretch;border-radius:14px;padding:16px 16px;
+    background:linear-gradient(160deg,#153663 0%,#1e40af 100%);color:#fff;box-shadow:0 6px 18px rgba(21,54,99,.18)}
+  .hero .haside h4{margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:#a9c6f5;font-weight:700}
+  .hero .haside .li{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.14);font-size:13.5px}
+  .hero .haside .li:last-child{border-bottom:0}
+  .hero .haside .li b{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+  .hero .haside .big{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2}
+  .hero .haside .cap{font-size:12px;color:#cfe0f6;margin-top:2px}
+  .hero .haside .ok{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:12.5px;font-weight:700;color:#c7f0d3}
+  .hero .haside .ok::before{content:"=";display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#22c55e;color:#06340f;font-weight:800}
+  @media (max-width:640px){.hero{flex-direction:column}.hero .haside{flex-basis:auto}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px;margin:14px 0;box-shadow:0 1px 2px rgba(16,42,74,.04)}
+  .card h3{margin:0 0 10px;font-size:15px;color:var(--navy)}
+  /* owner snapshot grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+  .stat .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .stat .v{font-size:22px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;margin-top:4px}
+  .stat .v.pos{color:var(--green)} .stat .v.warn{color:var(--blue-d)}
+  .stat .note{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .mini{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:#f0f2f6;border:1px solid var(--line);border-radius:20px;padding:2px 9px;margin-left:8px;vertical-align:middle}
+  /* table */
+  .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px}
+  table{border-collapse:collapse;width:100%;min-width:720px;font-size:13px}
+  th,td{padding:9px 11px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left;white-space:normal;min-width:180px}
+  thead th{background:#f0f4fa;color:var(--navy);font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;position:sticky;left:auto}
+  td.num,th.num{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  tr.total td{background:#eef3fd;font-weight:800;color:var(--navy);border-top:2px solid #c9d9f6}
+  .chan{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--chip);color:var(--blue-d)}
+  .neg{color:var(--red)}
+  /* two-up */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:640px){.two{grid-template-columns:1fr}}
+  .je{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.9}
+  .je .row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding:2px 0}
+  .je .cr{padding-left:18px;color:#374151}
+  .je .bal{margin-top:8px;font-weight:800;color:var(--green)}
+  .match{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:700;font-size:13px;margin-top:8px}
+  .match::before{content:"✓";display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;font-size:11px}
+  ul.clean{list-style:none;padding:0;margin:0}
+  ul.clean li{padding:9px 0 9px 26px;position:relative;border-bottom:1px solid var(--line);font-size:14px}
+  ul.clean li:last-child{border-bottom:0}
+  ul.clean li::before{content:"";position:absolute;left:4px;top:15px;width:8px;height:8px;border-radius:50%;background:var(--blue)}
+  .rhythm h3{display:flex;align-items:center;gap:8px}
+  .tag{font-size:11px;font-weight:700;color:#fff;background:var(--blue);border-radius:6px;padding:2px 8px}
+  .tag.mo{background:var(--navy)} .tag.rep{background:var(--green)}
+  .fine{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6}
+  footer{border-top:1px solid var(--line);margin-top:34px;padding-top:16px;font-size:12.5px;color:var(--muted)}
+  footer b{color:var(--navy)}
+</style>
+</head>
+<body>
+<header>
+  <div class="hd">
+    <div class="brand">Crew<span>nexa</span></div>
+    <div class="role">Ecommerce Bookkeeping · Shopify + QuickBooks Online</div>
+  </div>
+  <div class="subline">Prepared for Mood.com · hemp-derived products, sold across retail, subscription and wholesale, under state-by-state rules.</div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" role="tablist">
+    <div class="tab" role="tab" aria-selected="true" onclick="go(0,this)">Your books, real profit<small>What you see each month</small></div>
+    <div class="tab" role="tab" aria-selected="false" onclick="go(1,this)">Live reconciliation<small>Shopify → bank → QuickBooks</small></div>
+    <div class="tab" role="tab" aria-selected="false" onclick="go(2,this)">Monthly rhythm<small>How we keep it reliable</small></div>
+  </div>
+
+  <!-- TAB 1 -->
+  <section class="panel on" id="p0">
+    <div class="hero">
+      <div class="htext">
+        <h2>Where your money actually lands, and what is really left</h2>
+        <p class="lead">Mood takes card and Apple Pay across retail, subscriptions and wholesale, ships under different state rules, and moves real inventory. So sales, processor fees, refunds, sales tax and stock all hit at different times and rarely match the bank on their own. Our job is to make them match, every month, and hand you a clear number for profit and for the tax you owe, so nothing is ever a guess at year end.</p>
+      </div>
+      <aside class="haside">
+        <h4>Mood at a glance</h4>
+        <div class="li"><span>Products live</span><b>155</b></div>
+        <div class="li"><span>Revenue streams</span><b>3</b></div>
+        <div class="li"><span>Payment</span><b>Cards · Apple Pay</b></div>
+        <div class="li"><span>Sales tax</span><b>Multi-state</b></div>
+      </aside>
+    </div>
+
+    <div class="card">
+      <h3>Owner snapshot <span class="mini">illustrative sample</span></h3>
+      <div class="grid">
+        <div class="stat"><div class="k">Revenue</div><div class="v">$1,292.39</div><div class="note">product + shipping</div></div>
+        <div class="stat"><div class="k">Cost of goods</div><div class="v">$581.50</div><div class="note">inventory sold</div></div>
+        <div class="stat"><div class="k">Gross profit</div><div class="v pos">$710.89</div><div class="note">55% margin</div></div>
+        <div class="stat"><div class="k">Processor fees</div><div class="v">$67.12</div><div class="note">card + Apple Pay</div></div>
+        <div class="stat"><div class="k">Profit after fees</div><div class="v pos">$643.77</div><div class="note">before operating costs</div></div>
+        <div class="stat"><div class="k">Sales tax to remit</div><div class="v warn">$5.71</div><div class="note">held, not income</div></div>
+        <div class="stat"><div class="k">Cash to your bank</div><div class="v">$1,230.98</div><div class="note">matched to payouts</div></div>
+      </div>
+      <p class="fine">Worked from the 5 sample transactions in the Live reconciliation tab so every figure ties back to a real line. The same logic scales to your full month once we are on your live accounts.</p>
+    </div>
+
+    <div class="card">
+      <h3>The four things that make Mood's books tricky, and how we handle each</h3>
+      <ul class="clean">
+        <li><b>Three revenue streams</b> (retail, subscription, wholesale) each settle and get taxed differently. We keep them separate and correct, not lumped together.</li>
+        <li><b>Sales tax across many states</b>, with wholesale treated as resale-exempt. We track what was collected in each state so filing is ready, not a scramble.</li>
+        <li><b>Inventory and COGS on 155 products plus bundles.</b> We book cost against each sale so your margin is real, not a guess.</li>
+        <li><b>Card payouts, fees and refunds</b> that never equal the sale amount. We reconcile the processor deposit to the bank to the penny.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- TAB 2 -->
+  <section class="panel" id="p1">
+    <div class="hero">
+      <div class="htext">
+        <h2>Live reconciliation: Shopify to bank to QuickBooks</h2>
+        <p class="lead">Every order broken down the way it actually settles. The customer is charged product plus shipping plus tax, the processor keeps its fee, and only the net reaches your bank. We line all of that up so the net payouts add up to the bank deposit, and the whole set posts as one balanced entry in QuickBooks. This is the core monthly job, done cleanly.</p>
+      </div>
+      <aside class="haside">
+        <h4>The one thing that must match</h4>
+        <div class="big">$1,230.98</div>
+        <div class="cap">Sum of net payouts</div>
+        <div class="ok">Bank deposit $1,230.98</div>
+        <div class="li" style="margin-top:12px"><span>Sales tax held</span><b>$5.71</b></div>
+        <div class="cap" style="margin-top:4px">Kept for the states, never counted as income.</div>
+      </aside>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Order</th><th>Channel</th><th>State</th>
+            <th class="num">Product</th><th class="num">Disc.</th><th class="num">Ship</th>
+            <th class="num">Sales tax</th><th class="num">Customer paid</th>
+            <th class="num">Fee</th><th class="num">Net payout</th><th class="num">COGS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>15mg Delta-9 Gummies</td><td><span class="chan">Retail</span></td><td>TX</td>
+            <td class="num">39.00</td><td class="num">0.00</td><td class="num">4.99</td>
+            <td class="num">3.22</td><td class="num">47.21</td>
+            <td class="num">2.61</td><td class="num">44.60</td><td class="num">12.00</td>
+          </tr>
+          <tr>
+            <td>Sleep Gummies · Subscribe &amp; Save 15%</td><td><span class="chan">Subscription</span></td><td>CA</td>
+            <td class="num">44.00</td><td class="num neg">-6.60</td><td class="num">0.00</td>
+            <td class="num">2.71</td><td class="num">40.11</td>
+            <td class="num">2.27</td><td class="num">37.84</td><td class="num">13.50</td>
+          </tr>
+          <tr>
+            <td>Pluto Disposable</td><td><span class="chan">Retail</span></td><td>FL</td>
+            <td class="num">50.00</td><td class="num">0.00</td><td class="num">4.99</td>
+            <td class="num">3.00</td><td class="num">57.99</td>
+            <td class="num">3.14</td><td class="num">54.85</td><td class="num">16.00</td>
+          </tr>
+          <tr>
+            <td>Bulk order · resale, tax-exempt</td><td><span class="chan">Wholesale</span></td><td>OK</td>
+            <td class="num">1,200.00</td><td class="num">0.00</td><td class="num">0.00</td>
+            <td class="num">0.00</td><td class="num">1,200.00</td>
+            <td class="num">59.10</td><td class="num">1,140.90</td><td class="num">540.00</td>
+          </tr>
+          <tr>
+            <td>Refund · consumable, not restocked</td><td><span class="chan">Retail</span></td><td>TX</td>
+            <td class="num neg">-39.00</td><td class="num">0.00</td><td class="num neg">-4.99</td>
+            <td class="num neg">-3.22</td><td class="num neg">-47.21</td>
+            <td class="num">0.00</td><td class="num neg">-47.21</td><td class="num">0.00</td>
+          </tr>
+          <tr class="total">
+            <td>Totals</td><td></td><td></td>
+            <td class="num">1,294.00</td><td class="num">-6.60</td><td class="num">4.99</td>
+            <td class="num">5.71</td><td class="num">1,298.10</td>
+            <td class="num">67.12</td><td class="num">1,230.98</td><td class="num">581.50</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <h3>Bank reconciliation</h3>
+        <div class="je">
+          <div class="row"><span>Sum of net payouts</span><span>$1,230.98</span></div>
+          <div class="row"><span>Processor deposit to bank</span><span>$1,230.98</span></div>
+        </div>
+        <div class="match">Matched to the penny</div>
+        <p class="fine">Sales tax of $5.71 sits in a liability account, held for the states, never counted as your income.</p>
+      </div>
+      <div class="card">
+        <h3>How it posts in QuickBooks</h3>
+        <div class="je">
+          <div class="row"><span>Dr &nbsp;Bank (cash)</span><span>1,230.98</span></div>
+          <div class="row"><span>Dr &nbsp;Merchant fees</span><span>67.12</span></div>
+          <div class="row cr"><span>Cr &nbsp;Product sales</span><span>1,287.40</span></div>
+          <div class="row cr"><span>Cr &nbsp;Shipping income</span><span>4.99</span></div>
+          <div class="row cr"><span>Cr &nbsp;Sales tax payable</span><span>5.71</span></div>
+          <div class="bal">Debits = Credits = 1,298.10</div>
+        </div>
+        <p class="fine">COGS books separately: Dr Cost of goods $581.50, Cr Inventory $581.50.</p>
+      </div>
+    </div>
+    <p class="fine">Illustrative sample: processor rate shown at 4.9% + $0.30, sample state tax rates, wholesale as resale-exempt. On your accounts we use your real rates, processor statements and Shopify payout reports.</p>
+  </section>
+
+  <!-- TAB 3 -->
+  <section class="panel" id="p2">
+    <h2>How we keep it reliable, every week and month</h2>
+    <p class="lead">Clean books are a rhythm, not a year-end rescue. Here is the routine we run so nothing piles up and you are never guessing where things stand.</p>
+
+    <div class="card rhythm">
+      <h3><span class="tag">Weekly</span> Keep it current</h3>
+      <ul class="clean">
+        <li>Categorize new orders across retail, subscription and wholesale.</li>
+        <li>Match processor payouts to the bank and flag anything that does not.</li>
+        <li>Record refunds and any chargebacks, and update inventory received.</li>
+      </ul>
+    </div>
+
+    <div class="card rhythm">
+      <h3><span class="tag mo">Month-end</span> Close it properly</h3>
+      <ul class="clean">
+        <li>Reconcile every payout and bank line, and every card account.</li>
+        <li>Book COGS and adjust inventory value for what sold and what came in.</li>
+        <li>Prepare sales tax collected by state, filing-ready, wholesale kept exempt.</li>
+      </ul>
+    </div>
+
+    <div class="card rhythm">
+      <h3><span class="tag rep">Each month you get</span> A clear picture</h3>
+      <ul class="clean">
+        <li>Profit and loss, cash position, and inventory value.</li>
+        <li>Gross margin by channel, so you see which stream actually pays.</li>
+        <li>The exact sales tax to remit, and where.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Built for how a hemp business actually runs</h3>
+      <ul class="clean">
+        <li>Wholesale booked as resale-exempt, with certificates kept on file.</li>
+        <li>Per-state tax and shipping rules tracked as they change.</li>
+        <li>High-risk processor payouts and fees reconciled, not assumed.</li>
+        <li>These are hemp products under the 2018 Farm Bill, not state-licensed marijuana, so we keep your books organized the standard way and fully aligned with how your CPA treats them, no surprises at tax time.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <b>Crewnexa</b> · Ecommerce bookkeeping for Shopify and QuickBooks Online.<br>
+    Figures shown are illustrative sample data to demonstrate method. Real numbers are drawn from your live Shopify, processor and bank accounts.
+  </footer>
+</div>
+
+<script>
+  function go(i,el){
+    document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
+    el.setAttribute('aria-selected','true');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+    document.getElementById('p'+i).classList.add('on');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+</script>
+</body>
+</html>
